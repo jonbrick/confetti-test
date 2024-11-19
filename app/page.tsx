@@ -1,4 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
@@ -9,9 +13,35 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button"; // Update the import path
+import { Button } from "@/components/ui/button";
+import { badgeVariants } from "@/components/ui/badge";
 
 export default function Home() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+  const CLOSE_DELAY = 5000; // 5 seconds in milliseconds
+
+  useEffect(() => {
+    if (isOpen) {
+      // Auto close after CLOSE_DELAY
+      const closeTimer = setTimeout(() => {
+        setIsOpen(false);
+        setCountdown(5); // Reset countdown
+      }, CLOSE_DELAY);
+
+      // Update countdown every second
+      const countdownInterval = setInterval(() => {
+        setCountdown((prev) => Math.max(0, prev - 1));
+      }, 1000);
+
+      // Cleanup timers
+      return () => {
+        clearTimeout(closeTimer);
+        clearInterval(countdownInterval);
+      };
+    }
+  }, [isOpen]);
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
@@ -35,7 +65,7 @@ export default function Home() {
         </ol>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <Dialog>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button
                 variant="default" // You can use any variant defined in buttonVariants
@@ -53,18 +83,25 @@ export default function Home() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Are you sure?</DialogTitle>
+                <DialogTitle>Deployment Successful!</DialogTitle>
                 <DialogDescription>
-                  This will deploy your application to Vercel.
+                  Your deployment can be visible at{" "}
+                  <Link
+                    href=""
+                    className={badgeVariants({ variant: "outline" })}
+                  >
+                    Deployments
+                  </Link>
+                  {"."}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <DialogClose asChild>
                   <Button type="button" variant="outline">
-                    Close
+                    Cancel ({countdown}s)
                   </Button>
                 </DialogClose>
-                <Button type="submit">Save changes</Button>
+                <Button type="submit">View deployments</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
