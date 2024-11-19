@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -21,6 +21,7 @@ export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const CLOSE_DELAY = 5000; // 5 seconds in milliseconds
+  const animationFrameId = useRef<number>();
 
   useEffect(() => {
     if (isOpen) {
@@ -67,11 +68,17 @@ export default function Home() {
         colors: colors,
       });
 
-      requestAnimationFrame(frame);
+      animationFrameId.current = requestAnimationFrame(frame);
     };
 
     frame();
   };
+
+  useEffect(() => {
+    if (!isOpen && animationFrameId.current) {
+      cancelAnimationFrame(animationFrameId.current);
+    }
+  }, [isOpen]);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
